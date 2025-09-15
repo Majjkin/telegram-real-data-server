@@ -73,17 +73,22 @@ class TelegramClient:
                 from telethon import TelegramClient as TGClient
                 from telethon.sessions import StringSession
                 
+                logger.info("🔌 Creating Telegram client...")
                 self.client = TGClient(
                     StringSession(self.session_string),
                     int(self.api_id),
                     self.api_hash
                 )
+                
+                logger.info("🔌 Starting Telegram client...")
                 await self.client.start()
                 self.connected = True
                 logger.info("✅ Telegram client connected successfully!")
                 return True
             except Exception as e:
                 logger.error(f"❌ Failed to connect to Telegram: {e}")
+                logger.error(f"❌ Error type: {type(e).__name__}")
+                logger.error(f"❌ Error details: {str(e)}")
                 self.connected = False
                 return False
     
