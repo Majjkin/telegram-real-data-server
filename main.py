@@ -312,7 +312,7 @@ async def creative_generate(req: PromptReq):
         
         # Генерируем изображение через FAL
         result = fal_client.submit(
-            "fal-ai/flux-dev",
+            "fal-ai/flux",
             arguments={
                 "prompt": f"Fashion image inspired by {req.feed_item_id}, high quality, professional photography",
                 "image_size": "square_hd",
