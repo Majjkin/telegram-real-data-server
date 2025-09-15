@@ -116,8 +116,8 @@ class TelegramClient:
             
             # Получаем сообщения
             message_count = 0
-            async for message in self.client.iter_messages(entity, limit=limit*3):
-                if message.views and message.views >= 1000:  # Минимум 1000 просмотров
+            async for message in self.client.iter_messages(entity, limit=limit*5):
+                if message.views and message.views >= 500:  # Минимум 500 просмотров
                     post_data = {
                         'id': f"{channel_username}_{message.id}",
                         'channel': channel_username,
@@ -136,6 +136,9 @@ class TelegramClient:
                     
                     if message_count >= limit:
                         break
+                    
+                    # Небольшая задержка для стабильности
+                    await asyncio.sleep(0.1)
             
             logger.info(f"✅ Retrieved {len(posts)} real posts from {channel_username}")
             return posts
