@@ -326,9 +326,9 @@ async def creative_generate(req: PromptReq):
             }
         )
         
-        logger.info(f"⏳ Polling FAL API result...")
+        logger.info(f"⏳ Waiting for FAL API result...")
         # Получаем результат
-        result = fal_client.poll(result)
+        result = fal_client.wait(result)
         image_url = result["images"][0]["url"]
         prompt = f"Generated image for {req.feed_item_id}"
         
