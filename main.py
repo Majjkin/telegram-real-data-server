@@ -297,7 +297,10 @@ async def creative_generate(req: PromptReq):
     
     # Проверяем FAL_KEY
     fal_key = os.getenv("FAL_KEY")
-    if not fal_key:
+    logger.info(f"🔍 FAL_KEY check: {fal_key is not None}")
+    if fal_key:
+        logger.info(f"🔑 FAL_KEY found: {fal_key[:20]}...")
+    else:
         logger.warning("❌ FAL_KEY not found, using demo image")
         return {
             "image_url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
