@@ -310,9 +310,12 @@ async def creative_generate(req: PromptReq):
     try:
         import fal_client
         
+        logger.info(f"🔑 FAL_KEY found: {fal_key[:20]}...")
+        
         # Генерируем изображение через FAL
+        logger.info(f"🎨 Submitting to FAL API...")
         result = fal_client.submit(
-            "fal-ai/flux",
+            "fal-ai/flux-pro",
             arguments={
                 "prompt": f"Fashion image inspired by {req.feed_item_id}, high quality, professional photography",
                 "image_size": "square_hd",
@@ -320,12 +323,13 @@ async def creative_generate(req: PromptReq):
             }
         )
         
+        logger.info(f"⏳ Polling FAL API result...")
         # Получаем результат
         result = fal_client.poll(result)
         image_url = result["images"][0]["url"]
         prompt = f"Generated image for {req.feed_item_id}"
         
-        logger.info(f"✅ Generated image for {req.feed_item_id}")
+        logger.info(f"✅ Generated image for {req.feed_item_id}: {image_url}")
         return {
             "image_url": image_url,
             "prompt": prompt,
