@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 import io
+import time
 import requests
 import logging
 import os
@@ -45,7 +46,7 @@ WORKING_CHANNELS = {
     "fashion": ["rogov24", "burimovasasha", "zarina_brand"]
 }
 
-# Telegram клиент
+# Telegram клиент с кэшированием
 class TelegramClient:
     def __init__(self):
         self.api_id = os.getenv("TELEGRAM_API_ID")
@@ -54,6 +55,8 @@ class TelegramClient:
         self.client = None
         self.connected = False
         self.connection_lock = asyncio.Lock()
+        self.cache = {}  # Кэш для постов
+        self.cache_timeout = 300  # 5 минут
         
     async def connect(self):
         """Подключение к Telegram"""
@@ -92,7 +95,15 @@ class TelegramClient:
                 return False
     
     async def get_channel_posts(self, channel_username: str, limit: int = 10):
-        """Получение реальных постов из канала"""
+        """Получение реальных постов из канала с кэшированием"""
+        # Проверяем кэш
+        cache_key = f"{channel_username}_{limit}"
+        if cache_key in self.cache:
+            cache_time, posts = self.cache[cache_key]
+            if time.time() - cache_time < self.cache_timeout:
+                logger.info(f"📦 Using cached posts for {channel_username}")
+                return posts
+        
         logger.info(f"🔍 Fetching real posts from {channel_username}")
         
         # Подключаемся если еще не подключены
@@ -137,6 +148,11 @@ class TelegramClient:
                         break
             
             logger.info(f"✅ Retrieved {len(posts)} real posts from {channel_username}")
+            
+            # Сохраняем в кэш
+            self.cache[cache_key] = (time.time(), posts)
+            logger.info(f"📦 Cached {len(posts)} posts for {channel_username}")
+            
             return posts
             
         except Exception as e:
