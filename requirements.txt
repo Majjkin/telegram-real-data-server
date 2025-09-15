@@ -6,3 +6,4 @@ telethon
 python-dotenv
 Pillow==10.1.0
 requests
+fal-client

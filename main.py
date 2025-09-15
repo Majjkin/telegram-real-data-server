@@ -295,12 +295,53 @@ async def creative_generate(req: PromptReq):
     """Генерация изображений"""
     logger.info(f"🎨 Generating image for: {req.feed_item_id}")
     
-    return {
-        "image_url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
-        "prompt": f"Generated image for {req.feed_item_id}",
-        "seed": random.randint(1000, 9999),
-        "provider": "telegram_real"
-    }
+    # Проверяем FAL_KEY
+    fal_key = os.getenv("FAL_KEY")
+    if not fal_key:
+        logger.warning("❌ FAL_KEY not found, using demo image")
+        return {
+            "image_url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
+            "prompt": f"Generated image for {req.feed_item_id}",
+            "seed": random.randint(1000, 9999),
+            "provider": "demo"
+        }
+    
+    # Используем FAL API для реальной генерации
+    try:
+        import fal_client
+        
+        # Генерируем изображение через FAL
+        result = fal_client.submit(
+            "fal-ai/flux-dev",
+            arguments={
+                "prompt": f"Fashion image inspired by {req.feed_item_id}, high quality, professional photography",
+                "image_size": "square_hd",
+                "num_inference_steps": 28
+            }
+        )
+        
+        # Получаем результат
+        result = fal_client.poll(result)
+        image_url = result["images"][0]["url"]
+        prompt = f"Generated image for {req.feed_item_id}"
+        
+        logger.info(f"✅ Generated image for {req.feed_item_id}")
+        return {
+            "image_url": image_url,
+            "prompt": prompt,
+            "seed": random.randint(1000, 9999),
+            "provider": "fal_ai"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ FAL API error: {e}")
+        # Fallback на демо изображение
+        return {
+            "image_url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
+            "prompt": f"Generated image for {req.feed_item_id}",
+            "seed": random.randint(1000, 9999),
+            "provider": "demo_fallback"
+        }
 
 @app.get("/ui", response_class=HTMLResponse)
 def ui():
