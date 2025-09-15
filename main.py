@@ -40,10 +40,9 @@ class PromptReq(BaseModel):
     feed_item_id: str
 
 # Реальные рабочие каналы (найдены через find_working_channels.py)
+# Для MVP оставляем только 3 канала Fashion для стабильности
 WORKING_CHANNELS = {
-    "fashion": ["rogov24", "burimovasasha", "zarina_brand", "limeofficial", "ekonika", "sela_brand", "lichi", "befree_community", "mordorblog", "bymirraa"],
-    "beauty": ["goldapple_ru", "marietells", "writeforfriends"],
-    "home": ["casacozy", "homiesapiens", "home_where"]
+    "fashion": ["rogov24", "burimovasasha", "zarina_brand"]
 }
 
 # Telegram клиент
@@ -136,9 +135,6 @@ class TelegramClient:
                     
                     if message_count >= limit:
                         break
-                    
-                    # Небольшая задержка для стабильности
-                    await asyncio.sleep(0.1)
             
             logger.info(f"✅ Retrieved {len(posts)} real posts from {channel_username}")
             return posts
@@ -332,8 +328,6 @@ def ui():
         
         <div class="tabs">
             <button class="tab active" onclick="loadFeed('fashion')">Fashion</button>
-            <button class="tab" onclick="loadFeed('beauty')">Beauty</button>
-            <button class="tab" onclick="loadFeed('home')">Home</button>
         </div>
         
         <div id="feed" class="feed">
@@ -343,15 +337,11 @@ def ui():
 
     <script>
         async function loadFeed(category) {
-            // Обновляем активную вкладку
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
             // Показываем загрузку
             document.getElementById('feed').innerHTML = '<div class="loading">Loading real posts from Telegram...</div>';
             
             try {
-                const response = await fetch(`/telegram/channels/${category}`);
+                const response = await fetch(`/telegram/channels/${category}?limit=6`);
                 const data = await response.json();
                 
                 if (data.posts) {
