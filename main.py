@@ -94,7 +94,10 @@ class TelegramClient:
     
     async def get_channel_posts(self, channel_username: str, limit: int = 10):
         """Получение реальных постов из канала"""
+        logger.info(f"🔍 Fetching real posts from {channel_username}")
+        
         # Подключаемся если еще не подключены
+        logger.info(f"🔌 Attempting to connect to Telegram...")
         if not await self.connect():
             logger.warning(f"📱 Telegram not connected, using demo for {channel_username}")
             return self._get_demo_posts(channel_username, limit)
