@@ -64,6 +64,9 @@ class TelegramClient:
                 
             if not all([self.api_id, self.api_hash, self.session_string]):
                 logger.warning("❌ Telegram credentials not found - using demo mode")
+                logger.warning(f"📱 API ID: {self.api_id}")
+                logger.warning(f"📱 API Hash: {self.api_hash}")
+                logger.warning(f"📱 Session: {self.session_string}")
                 return False
                 
             try:
@@ -86,10 +89,6 @@ class TelegramClient:
     
     async def get_channel_posts(self, channel_username: str, limit: int = 10):
         """Получение реальных постов из канала"""
-        # Временно используем только демо данные для стабильности
-        logger.warning(f"📱 Using demo data for {channel_username}")
-        return self._get_demo_posts(channel_username, limit)
-        
         # Подключаемся если еще не подключены
         if not await self.connect():
             logger.warning(f"📱 Telegram not connected, using demo for {channel_username}")
